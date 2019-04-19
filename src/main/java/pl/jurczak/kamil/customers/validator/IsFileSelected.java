@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ METHOD, FIELD, ANNOTATION_TYPE })
 @Retention(RUNTIME)
-@Constraint(validatedBy = FileSelectedValidator.class)
+@Constraint(validatedBy = IsFileSelectedValidator.class)
 @Documented
 public @interface IsFileSelected {
     String message() default "Please select a file";

@@ -3,15 +3,21 @@ package pl.jurczak.kamil.customers.controller;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.jurczak.kamil.customers.dao.CustomerDao;
+import pl.jurczak.kamil.customers.enumeration.FileExtention;
 import pl.jurczak.kamil.customers.model.Customer;
 import pl.jurczak.kamil.customers.model.Customers;
+import pl.jurczak.kamil.customers.model.FileBucket;
 import pl.jurczak.kamil.customers.util.CustomerCsvReader;
+
+import javax.validation.Valid;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -25,10 +31,6 @@ import java.io.*;
 @Controller
 public class HomeController {
 
-    private static final String CSV = "csv";
-    private static final String TXT = "txt";
-    private static final String XML = "xml";
-
     private CustomerDao customerDao;
 
     @Autowired
@@ -37,66 +39,61 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public String home() {
+    public String home(Model model) {
+        model.addAttribute("fileBucket", new FileBucket());
         return "home";
     }
 
     @PostMapping("/")
-    public String uploadFile(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
-        if (file.isEmpty()) {
-            redirectAttributes.addFlashAttribute("message", "Please select a file");
-            return "redirect:/";
-        } else {
-            String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-            if (extension != null) {
-                if (extension.equalsIgnoreCase(CSV) || extension.equalsIgnoreCase(TXT)) {
+    public String uploadFile(@ModelAttribute("fileBucket") @Valid FileBucket bucket, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            return "home";
+        }
+
+        MultipartFile file = bucket.getFile();
+            try {
+                String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+                if (extension.equalsIgnoreCase(FileExtention.CSV.toString()) || extension.equalsIgnoreCase(FileExtention.TXT.toString())) {
                     CustomerCsvReader customerCsvReader = new CustomerCsvReader();
                     BufferedReader br;
-                    try {
-                        String line;
-                        InputStream is = file.getInputStream();
-                        br = new BufferedReader(new InputStreamReader(is));
-                        while ((line = br.readLine()) != null) {
-                            Customer customer = customerCsvReader.read(line);
-                            customerDao.addCustomer(customer);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    String line;
+                    InputStream is = file.getInputStream();
+                    br = new BufferedReader(new InputStreamReader(is));
+                    while ((line = br.readLine()) != null) {
+                        Customer customer = customerCsvReader.read(line);
+                        customerDao.addCustomer(customer);
                     }
-                    redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
-                    return "redirect:/";
-                } else if (extension.equalsIgnoreCase(XML)) {
-                    try {
-                        XMLInputFactory xmlif = XMLInputFactory.newInstance();
-                        XMLStreamReader xmlr = xmlif.createXMLStreamReader(new InputStreamReader(file.getInputStream()));
 
-                        JAXBContext jaxbContext = JAXBContext.newInstance(Customers.class);
-                        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+                } else if (extension.equalsIgnoreCase(FileExtention.XML.toString())) {
+                    InputStreamReader isr = new InputStreamReader(file.getInputStream());
+                    XMLInputFactory xmlif = XMLInputFactory.newInstance();
+                    XMLStreamReader xmlr = xmlif.createXMLStreamReader(isr);
 
-                        xmlr.nextTag();
-                        xmlr.require(XMLStreamConstants.START_ELEMENT, null, "persons");
+                    JAXBContext jaxbContext = JAXBContext.newInstance(Customers.class);
+                    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-                        xmlr.nextTag();
-                        while (xmlr.getEventType() == XMLStreamConstants.START_ELEMENT) {
-                            JAXBElement<Customer> customerJAXBElement = unmarshaller.unmarshal(xmlr, Customer.class);
-                            Customer customer = customerJAXBElement.getValue();
-                            customerDao.addCustomer(customer);
+                    xmlr.nextTag();
+                    xmlr.require(XMLStreamConstants.START_ELEMENT, null, "persons");
 
-                            if (xmlr.getEventType() == XMLStreamConstants.CHARACTERS) {
-                                xmlr.next();
-                            }
+                    xmlr.nextTag();
+                    while (xmlr.getEventType() == XMLStreamConstants.START_ELEMENT) {
+                        JAXBElement<Customer> customerJAXBElement = unmarshaller.unmarshal(xmlr, Customer.class);
+                        Customer customer = customerJAXBElement.getValue();
+                        customerDao.addCustomer(customer);
+
+                        if (xmlr.getEventType() == XMLStreamConstants.CHARACTERS) {
+                            xmlr.next();
                         }
-                    } catch (JAXBException | IOException | XMLStreamException e) {
-                        e.printStackTrace();
                     }
-                    redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
-                    return "redirect:/";
-                } else {
-                    redirectAttributes.addFlashAttribute("message", "Unsupported file type. Plese select CSV, TXT or XML");
-                    return "redirect:/";
                 }
+
+                redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
+                return "redirect:/";
+
+            } catch (JAXBException | IOException | XMLStreamException e) {
+                e.printStackTrace();
             }
-        }
         return "redirect:/";
     }
 }

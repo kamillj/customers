@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 @Component
-public class FileSelectedValidator implements ConstraintValidator<IsFileSelected, MultipartFile> {
+public class IsFileSelectedValidator implements ConstraintValidator<IsFileSelected, MultipartFile> {
 
     @Override
     public void initialize(IsFileSelected isFileSelected) {

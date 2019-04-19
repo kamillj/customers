@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ METHOD, FIELD, ANNOTATION_TYPE })
 @Retention(RUNTIME)
-@Constraint(validatedBy = FileTypeValidator.class)
+@Constraint(validatedBy = SupportedFileTypeValidor.class)
 @Documented
 public @interface SupportedFileType {
     String message() default "Unsupported file type";
