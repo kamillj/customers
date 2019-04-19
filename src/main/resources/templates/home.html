@@ -3,19 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Import customers data</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/4.2.1/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/style.css}"/>
 </head>
 <body>
+<br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/>
+<br/><br/>
 <div align="center">
     <h1>Customer data importing tool</h1>
 </div>
+<br/><br/><br/>
 <div align="center">
-    <form th:method="POST" th:action="@{/}" enctype="multipart/form-data">
-        <input type="file" name="file"/><br/><br/>
+    <form th:method="POST" th:action="@{/}" th:object="${fileBucket}" enctype="multipart/form-data">
+        <input type="file" name="file" th:field="*{file}" value="Choose"
+               placeholder="Please select a file"/><br/><br/><br/>
         <input type="submit" value="Submit"/>
+        <br/><br/>
+        <div>
+            <p th:if="${#fields.hasErrors('file')}" th:errors="*{file}" th:id="error"/>
+        </div>
+        <div th:if="${message}">
+            <p th:text="${message}" th:id="success"/>
+        </div>
     </form>
-    <div th:if="${message}" id="status">
-        <h2 th:text="${message}"/>
-    </div>
 </div>
 </body>
 </html>
