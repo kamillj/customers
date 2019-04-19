@@ -3,8 +3,14 @@ package pl.jurczak.kamil.customers.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 @Data
 @NoArgsConstructor
+@XmlRootElement(name = "person")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Customer {
 
     private long id;
@@ -12,7 +18,7 @@ public class Customer {
     private String surname;
     private int age = -1;
     private String city;
-    private Contact contact;
+    private Contacts contacts;
 
     public Customer(String name, String surname) {
         this.name = name;

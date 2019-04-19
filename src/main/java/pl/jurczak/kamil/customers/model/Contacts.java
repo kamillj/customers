@@ -2,17 +2,27 @@ package pl.jurczak.kamil.customers.model;
 
 import lombok.Data;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class Contact {
+@XmlRootElement(name = "contacts")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Contacts {
 
     private long id;
     private long idCustomer;
+    @XmlElement(name = "phone")
     private List<String> phones;
+    @XmlElement(name = "email")
     private List<String> emails;
+    @XmlElement(name = "icq")
     private List<String> icqs;
+    @XmlElement(name = "jabber")
     private List<String> jabbers;
     private List<String> undefineds;
 

@@ -28,40 +28,40 @@ public class CustomerDaoImpl implements CustomerDao {
             jdbcTemplate.update(insertCutomer, idCustomer, customer.getName(), customer.getSurname(), customer.getAge());
         }
 
-        if (customer.getContact() != null) {
-            if (customer.getContact().getUndefineds() != null && customer.getContact().getUndefineds().size() > 0) {
-                for (int i = 0; i < customer.getContact().getUndefineds().size(); i++) {
+        if (customer.getContacts() != null) {
+            if (customer.getContacts().getUndefineds() != null && customer.getContacts().getUndefineds().size() > 0) {
+                for (int i = 0; i < customer.getContacts().getUndefineds().size(); i++) {
                     String insertContact = "INSERT INTO \"Contacts\" (id, id_customer, type, contact) VALUES (?, ?, ?, ?)";
                     jdbcTemplate.update(insertContact, getNextContactsSeqVal(), idCustomer,
-                            0, customer.getContact().getUndefineds().get(i));
+                            0, customer.getContacts().getUndefineds().get(i));
                 }
             }
-            if (customer.getContact().getEmails() != null && customer.getContact().getEmails().size() > 0) {
-                for (int i = 0; i < customer.getContact().getEmails().size(); i++) {
+            if (customer.getContacts().getEmails() != null && customer.getContacts().getEmails().size() > 0) {
+                for (int i = 0; i < customer.getContacts().getEmails().size(); i++) {
                     String insertContact = "INSERT INTO \"Contacts\" (id, id_customer, type, contact) VALUES (?, ?, ?, ?)";
                     jdbcTemplate.update(insertContact, getNextContactsSeqVal(), idCustomer,
-                            1, customer.getContact().getEmails().get(i));
+                            1, customer.getContacts().getEmails().get(i));
                 }
             }
-            if (customer.getContact().getPhones() != null && customer.getContact().getPhones().size() > 0) {
-                for (int i = 0; i < customer.getContact().getPhones().size(); i++) {
+            if (customer.getContacts().getPhones() != null && customer.getContacts().getPhones().size() > 0) {
+                for (int i = 0; i < customer.getContacts().getPhones().size(); i++) {
                     String insertContact = "INSERT INTO \"Contacts\" (id, id_customer, type, contact) VALUES (?, ?, ?, ?)";
                     jdbcTemplate.update(insertContact, getNextContactsSeqVal(), idCustomer,
-                            2, customer.getContact().getPhones().get(i));
+                            2, customer.getContacts().getPhones().get(i));
                 }
             }
-            if (customer.getContact().getJabbers() != null && customer.getContact().getJabbers().size() > 0) {
-                for (int i = 0; i < customer.getContact().getJabbers().size(); i++) {
+            if (customer.getContacts().getJabbers() != null && customer.getContacts().getJabbers().size() > 0) {
+                for (int i = 0; i < customer.getContacts().getJabbers().size(); i++) {
                     String insertContact = "INSERT INTO \"Contacts\" (id, id_customer, type, contact) VALUES (?, ?, ?, ?)";
                     jdbcTemplate.update(insertContact, getNextContactsSeqVal(), idCustomer,
-                            3, customer.getContact().getJabbers().get(i));
+                            3, customer.getContacts().getJabbers().get(i));
                 }
             }
-            if (customer.getContact().getIcqs() != null && customer.getContact().getIcqs().size() > 0) {
-                for (int i = 0; i < customer.getContact().getIcqs().size(); i++) {
+            if (customer.getContacts().getIcqs() != null && customer.getContacts().getIcqs().size() > 0) {
+                for (int i = 0; i < customer.getContacts().getIcqs().size(); i++) {
                     String insertContact = "INSERT INTO \"Contacts\" (id, id_customer, type, contact) VALUES (?, ?, ?, ?)";
                     jdbcTemplate.update(insertContact, getNextContactsSeqVal(), idCustomer,
-                            4, customer.getContact().getIcqs().get(i));
+                            4, customer.getContacts().getIcqs().get(i));
                 }
             }
         }

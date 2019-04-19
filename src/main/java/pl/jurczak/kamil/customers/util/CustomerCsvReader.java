@@ -2,7 +2,7 @@ package pl.jurczak.kamil.customers.util;
 
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.jurczak.kamil.customers.model.Contact;
+import pl.jurczak.kamil.customers.model.Contacts;
 import pl.jurczak.kamil.customers.model.Customer;
 
 @NoArgsConstructor
@@ -13,27 +13,26 @@ public class CustomerCsvReader {
 
     public Customer read(String line) {
         Customer customer = new Customer();
-        Contact contact = null;
+        Contacts contacts = null;
         String[] values = line.split(CSV_SEPARATOR);
         for (int i = 0; i < values.length; i++) {
             if (!values[i].trim().isEmpty()) {
-                System.out.println(values[i]);
                 if (i == 0) customer.setName(values[i]);
                 if (i == 1) customer.setSurname(values[i]);
                 if (i == 2) customer.setAge(Integer.parseInt(values[i]));
                 if (i == 3) customer.setCity(values[i]);
                 if (i > 3) {
-                    if (contact == null) contact = new Contact();
+                    if (contacts == null) contacts = new Contacts();
 
-                    if (validEmail(values[i])) contact.addEmail(values[i]);
-                    else if (validPhone(values[i])) contact.addPhone(values[i]);
-                    else if (validIcq(values[i])) contact.addIcq(values[i]);
-                    else if (validJabber(values[i])) contact.addJabber(values[i]);
-                    else contact.addUndefined(values[i]);
+                    if (validEmail(values[i])) contacts.addEmail(values[i]);
+                    else if (validPhone(values[i])) contacts.addPhone(values[i]);
+                    else if (validIcq(values[i])) contacts.addIcq(values[i]);
+                    else if (validJabber(values[i])) contacts.addJabber(values[i]);
+                    else contacts.addUndefined(values[i]);
                 }
             }
         }
-        customer.setContact(contact);
+        customer.setContacts(contacts);
         return customer;
     }
 
