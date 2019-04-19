@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.jurczak.kamil.customers.dao.CustomerDao;
 import pl.jurczak.kamil.customers.model.Customer;
 import pl.jurczak.kamil.customers.model.Customers;
 import pl.jurczak.kamil.customers.util.CustomerCsvReader;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -23,7 +23,11 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.*;
 
 @Controller
-public class CustomerController {
+public class HomeController {
+
+    private static final String CSV = "csv";
+    private static final String TXT = "txt";
+    private static final String XML = "xml";
 
     private CustomerDao customerDao;
 
@@ -38,13 +42,14 @@ public class CustomerController {
     }
 
     @PostMapping("/")
-    public String uploadFile(@RequestParam("file") MultipartFile file) {
+    public String uploadFile(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
         if (file.isEmpty()) {
-            System.out.println("PLEASE SELECT A FILE");
+            redirectAttributes.addFlashAttribute("message", "Please select a file");
+            return "redirect:/";
         } else {
             String extension = FilenameUtils.getExtension(file.getOriginalFilename());
             if (extension != null) {
-                if (extension.equalsIgnoreCase("csv") || extension.equalsIgnoreCase("txt")) {
+                if (extension.equalsIgnoreCase(CSV) || extension.equalsIgnoreCase(TXT)) {
                     CustomerCsvReader customerCsvReader = new CustomerCsvReader();
                     BufferedReader br;
                     try {
@@ -52,16 +57,16 @@ public class CustomerController {
                         InputStream is = file.getInputStream();
                         br = new BufferedReader(new InputStreamReader(is));
                         while ((line = br.readLine()) != null) {
-                            System.out.println(line);
                             Customer customer = customerCsvReader.read(line);
                             customerDao.addCustomer(customer);
                         }
                     } catch (IOException e) {
-                        System.err.println(e.getMessage());
+                        e.printStackTrace();
                     }
-                } else if (extension.equalsIgnoreCase("xml")) {
+                    redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
+                    return "redirect:/";
+                } else if (extension.equalsIgnoreCase(XML)) {
                     try {
-                        //STax Reader
                         XMLInputFactory xmlif = XMLInputFactory.newInstance();
                         XMLStreamReader xmlr = xmlif.createXMLStreamReader(new InputStreamReader(file.getInputStream()));
 
@@ -84,6 +89,11 @@ public class CustomerController {
                     } catch (JAXBException | IOException | XMLStreamException e) {
                         e.printStackTrace();
                     }
+                    redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
+                    return "redirect:/";
+                } else {
+                    redirectAttributes.addFlashAttribute("message", "Unsupported file type. Plese select CSV, TXT or XML");
+                    return "redirect:/";
                 }
             }
         }

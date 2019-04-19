@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Import customers data</title>
+</head>
+<body>
+<div align="center">
+    <h1>Customer data importing tool</h1>
+</div>
+<div align="center">
+    <form th:method="POST" th:action="@{/}" enctype="multipart/form-data">
+        <input type="file" name="file"/><br/><br/>
+        <input type="submit" value="Submit"/>
+    </form>
+    <div th:if="${message}" id="status">
+        <h2 th:text="${message}"/>
+    </div>
+</div>
+</body>
+</html>
