@@ -5,7 +5,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.jurczak.kamil.customers.dao.CustomerDao;
+import pl.jurczak.kamil.customers.model.Contacts;
+import pl.jurczak.kamil.customers.model.ContactsRowMapper;
 import pl.jurczak.kamil.customers.model.Customer;
+import pl.jurczak.kamil.customers.model.CustomerRowMapper;
+
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class CustomerDaoImpl implements CustomerDao {
@@ -22,12 +30,18 @@ public class CustomerDaoImpl implements CustomerDao {
     public void addCustomer(Customer customer) {
         long idCustomer = getNextCustomerSeqVal();
         String insertCutomer;
-        if (customer.getAge() < 0) {
+        if (customer.getAge() < 0 && customer.getCity() == null) {
             insertCutomer = "INSERT INTO \"Customers\" (id, name, surname) VALUES (?, ?, ?)";
             jdbcTemplate.update(insertCutomer, idCustomer, customer.getName(), customer.getSurname());
-        } else {
+        } else if (customer.getAge() > 0 && customer.getCity() == null){
             insertCutomer = "INSERT INTO \"Customers\" (id, name, surname, age) VALUES (?, ?, ?, ?)";
             jdbcTemplate.update(insertCutomer, idCustomer, customer.getName(), customer.getSurname(), customer.getAge());
+        } else if (customer.getAge() > 0 && customer.getCity() != null){
+            insertCutomer = "INSERT INTO \"Customers\" (id, name, surname, age, city) VALUES (?, ?, ?, ?, ?)";
+            jdbcTemplate.update(insertCutomer, idCustomer, customer.getName(), customer.getSurname(), customer.getAge(), customer.getCity());
+        } else {
+            insertCutomer = "INSERT INTO \"Customers\" (id, name, surname, city) VALUES (?, ?, ?, ?)";
+            jdbcTemplate.update(insertCutomer, idCustomer, customer.getName(), customer.getSurname(), customer.getCity());
         }
 
         if (customer.getContacts() != null) {
@@ -67,6 +81,26 @@ public class CustomerDaoImpl implements CustomerDao {
                 }
             }
         }
+    }
+
+    public Customer getCustomerById(long id) {
+        String selectCustomer = "SELECT * FROM \"Customers\" WHERE id = " + id;
+        Customer customer = jdbcTemplate.queryForObject(selectCustomer, new CustomerRowMapper());
+
+        Contacts contacts = new Contacts();
+        String selectContacts = "SELECT * FROM \"Contacts\" WHERE id_customer = " + id;
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(selectContacts);
+        for (Map row : rows) {
+            if((Integer) row.get("type") == 1)  contacts.addEmail((String) row.get("contact"));
+            else if((Integer) row.get("type") == 2)  contacts.addPhone((String) row.get("contact"));
+            else if((Integer) row.get("type") == 3)  contacts.addJabber((String) row.get("contact"));
+            else if((Integer) row.get("type") == 4)  contacts.addIcq((String) row.get("contact"));
+            else if((Integer) row.get("type") == 0)  contacts.addUndefined((String) row.get("contact"));
+        }
+
+        customer.setContacts(contacts);
+
+        return customer;
     }
 
     private int getNextCustomerSeqVal() {

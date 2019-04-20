@@ -64,7 +64,6 @@ public class HomeController {
                 while ((line = br.readLine()) != null) {
                     Customer customer = customerCsvReader.read(line);
                     customerDao.addCustomer(customer);
-
                     if (i > 200) {
                         System.gc();
                         i = 0;
