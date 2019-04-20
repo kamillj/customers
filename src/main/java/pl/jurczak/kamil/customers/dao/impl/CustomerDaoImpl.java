@@ -3,6 +3,7 @@ package pl.jurczak.kamil.customers.dao.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import pl.jurczak.kamil.customers.dao.CustomerDao;
 import pl.jurczak.kamil.customers.model.Customer;
 
@@ -17,6 +18,7 @@ public class CustomerDaoImpl implements CustomerDao {
     }
 
     @Override
+    @Transactional
     public void addCustomer(Customer customer) {
         long idCustomer = getNextCustomerSeqVal();
         String insertCutomer;

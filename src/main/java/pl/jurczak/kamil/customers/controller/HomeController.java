@@ -52,48 +52,62 @@ public class HomeController {
         }
 
         MultipartFile file = bucket.getFile();
-            try {
-                String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-                if (extension.equalsIgnoreCase(FileExtension.CSV.getValue()) || extension.equalsIgnoreCase(FileExtension.TXT.getValue())) {
-                    CustomerCsvReader customerCsvReader = new CustomerCsvReader();
-                    BufferedReader br;
-                    String line;
-                    InputStream is = file.getInputStream();
-                    br = new BufferedReader(new InputStreamReader(is));
-                    while ((line = br.readLine()) != null) {
-                        Customer customer = customerCsvReader.read(line);
-                        customerDao.addCustomer(customer);
+        try {
+            String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+            if (extension.equalsIgnoreCase(FileExtension.CSV.getValue()) || extension.equalsIgnoreCase(FileExtension.TXT.getValue())) {
+                CustomerCsvReader customerCsvReader = new CustomerCsvReader();
+                BufferedReader br;
+                String line;
+                InputStream is = file.getInputStream();
+                br = new BufferedReader(new InputStreamReader(is));
+                int i = 0;
+                while ((line = br.readLine()) != null) {
+                    Customer customer = customerCsvReader.read(line);
+                    customerDao.addCustomer(customer);
+
+                    if (i > 200) {
+                        System.gc();
+                        i = 0;
                     }
-
-                } else if (extension.equalsIgnoreCase(FileExtension.XML.getValue())) {
-                    InputStreamReader isr = new InputStreamReader(file.getInputStream());
-                    XMLInputFactory xmlif = XMLInputFactory.newInstance();
-                    XMLStreamReader xmlr = xmlif.createXMLStreamReader(isr);
-
-                    JAXBContext jaxbContext = JAXBContext.newInstance(Customers.class);
-                    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-                    xmlr.nextTag();
-                    xmlr.require(XMLStreamConstants.START_ELEMENT, null, "persons");
-
-                    xmlr.nextTag();
-                    while (xmlr.getEventType() == XMLStreamConstants.START_ELEMENT) {
-                        JAXBElement<Customer> customerJAXBElement = unmarshaller.unmarshal(xmlr, Customer.class);
-                        Customer customer = customerJAXBElement.getValue();
-                        customerDao.addCustomer(customer);
-
-                        if (xmlr.getEventType() == XMLStreamConstants.CHARACTERS) {
-                            xmlr.next();
-                        }
-                    }
+                    i++;
                 }
 
-                redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
-                return "redirect:/";
+            } else if (extension.equalsIgnoreCase(FileExtension.XML.getValue())) {
+                InputStreamReader isr = new InputStreamReader(file.getInputStream());
+                XMLInputFactory xmlif = XMLInputFactory.newInstance();
+                XMLStreamReader xmlr = xmlif.createXMLStreamReader(isr);
 
-            } catch (JAXBException | IOException | XMLStreamException e) {
-                e.printStackTrace();
+                JAXBContext jaxbContext = JAXBContext.newInstance(Customers.class);
+                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+                xmlr.nextTag();
+                xmlr.require(XMLStreamConstants.START_ELEMENT, null, "persons");
+
+                xmlr.nextTag();
+                int i = 0;
+                while (xmlr.getEventType() == XMLStreamConstants.START_ELEMENT) {
+                    JAXBElement<Customer> customerJAXBElement = unmarshaller.unmarshal(xmlr, Customer.class);
+                    Customer customer = customerJAXBElement.getValue();
+                    customerDao.addCustomer(customer);
+
+                    if (xmlr.getEventType() == XMLStreamConstants.CHARACTERS) {
+                        xmlr.next();
+                    }
+
+                    if (i > 50) {
+                        System.gc();
+                        i = 0;
+                    }
+                    i++;
+                }
             }
+
+            redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
+            return "redirect:/";
+
+        } catch (JAXBException | IOException | XMLStreamException e) {
+            e.printStackTrace();
+        }
         return "redirect:/";
     }
 }
