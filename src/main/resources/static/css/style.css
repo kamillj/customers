@@ -1,0 +1,22 @@
+#error {
+    color: red;
+}
+
+#success {
+    color: green;
+}
+
+#inputBtn {
+    color: white;
+    background-color: green;
+    border: none;
+    width: 15%;
+    padding: 14px 28px;
+    font-size: 16px;
+    text-align: center;
+}
+
+#inputFile {
+    color: blue;
+    width: 200px
+}

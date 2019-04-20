@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.jurczak.kamil.customers.dao.CustomerDao;
-import pl.jurczak.kamil.customers.enumeration.FileExtention;
+import pl.jurczak.kamil.customers.enumeration.FileExtension;
 import pl.jurczak.kamil.customers.model.Customer;
 import pl.jurczak.kamil.customers.model.Customers;
 import pl.jurczak.kamil.customers.model.FileBucket;
@@ -54,7 +54,7 @@ public class HomeController {
         MultipartFile file = bucket.getFile();
             try {
                 String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-                if (extension.equalsIgnoreCase(FileExtention.CSV.toString()) || extension.equalsIgnoreCase(FileExtention.TXT.toString())) {
+                if (extension.equalsIgnoreCase(FileExtension.CSV.getValue()) || extension.equalsIgnoreCase(FileExtension.TXT.getValue())) {
                     CustomerCsvReader customerCsvReader = new CustomerCsvReader();
                     BufferedReader br;
                     String line;
@@ -65,7 +65,7 @@ public class HomeController {
                         customerDao.addCustomer(customer);
                     }
 
-                } else if (extension.equalsIgnoreCase(FileExtention.XML.toString())) {
+                } else if (extension.equalsIgnoreCase(FileExtension.XML.getValue())) {
                     InputStreamReader isr = new InputStreamReader(file.getInputStream());
                     XMLInputFactory xmlif = XMLInputFactory.newInstance();
                     XMLStreamReader xmlr = xmlif.createXMLStreamReader(isr);

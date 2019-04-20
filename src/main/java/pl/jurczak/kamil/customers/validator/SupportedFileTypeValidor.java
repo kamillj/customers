@@ -3,7 +3,7 @@ package pl.jurczak.kamil.customers.validator;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import pl.jurczak.kamil.customers.enumeration.FileExtention;
+import pl.jurczak.kamil.customers.enumeration.FileExtension;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -18,12 +18,12 @@ public class SupportedFileTypeValidor implements ConstraintValidator<SupportedFi
 
     @Override
     public boolean isValid(MultipartFile multipartFile, ConstraintValidatorContext constraintValidatorContext) {
-        return isAllFilesSupported(multipartFile);
+        return isFileSupported(multipartFile);
     }
 
-    private boolean isAllFilesSupported(MultipartFile multipartFile) {
+    private boolean isFileSupported(MultipartFile multipartFile) {
         if (multipartFile == null || multipartFile.isEmpty()) return true;
         String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename()).toUpperCase();
-        return FileExtention.getValues().contains(extension);
+        return FileExtension.getValues().contains(extension);
     }
 }
